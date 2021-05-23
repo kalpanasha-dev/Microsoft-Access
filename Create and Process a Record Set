@@ -1,0 +1,124 @@
+Option Explicit 
+Dim objExcel, objWorkbook, objWorksheet, row, col, msg, ThisTxt, ThisLen, ctrCells,  objFSO 
+Dim ipFN, j, ctrArrayElems 
+Dim GroupArray() 
+If Wscript.Arguments.Count = 0 then 
+ wscript.echo "Please drag a spreadsheet file name to this one!"  wscript.quit 
+end if 
+'*------------* 
+'* Create a recordset to contain the fields from the STIG 
+'*------------* 
+const adUseClient = 3 
+const adInteger = 3 
+const adChar = 129 
+const adDBTimeStamp = 135 
+dim MyRec : set MyRec = createobject("adodb.recordset") 
+MyRec.cursorLocation = adUseClient 
+MyRec.Fields.append "Col18",adchar,10  
+MyRec.Fields.append "Col19",adchar,100  
+MyRec.Fields.append "Col21",adchar,100  
+MyRec.Fields.append "Col22",adchar,200  
+MyRec.Fields.append "Col23",adchar,100  
+MyRec.Fields.append "Col28",adchar,255  
+MyRec.Fields.append "Col30",adchar,255  
+MyRec.Open 
+'*------------* 
+'* Read the Excel spreadsheet, and create a recordset of the contents '*------------* 
+Set objFSO = Createobject("Scripting.FileSystemobject") 
+IpFN = trim(wscript.arguments(0)) 
+' Start the Excel application 
+Set objExcel = Createobject("Excel.Application") 
+objExcel.Application.visible = false ' Do not make Excel visible Set objWorkbook = objExcel.Workbooks.Open(IPFN) 
+Set objWorksheet = objWorkbook.Worksheets(1)  
+ctrArrayElems = 0 
+Dim GroupID, GroupName 
+For Row = 1 to objWorksheet.UsedRange.Rows.Count 
+ GroupID = objWorksheet.Cells(row,18).Value 
+ GroupName = objWorksheet.Cells(row,19).Value 
+ If (trim(GroupID) <> "") or (trim(GroupName) <> "") then  
+ ctrArrayElems = ctrArrayElems + 1 
+ MyRec.Addnew 
+ MyRec("Col18") = objWorksheet.Cells(row,18).Value 
+ MyRec("Col19") = objWorksheet.Cells(row,19).Value 
+ MyRec("Col21") = objWorksheet.Cells(row,21).Value
+ MyRec("Col22") = objWorksheet.Cells(row,22).Value  MyRec("Col23") = objWorksheet.Cells(row,23).Value  MyRec("Col28") = objWorksheet.Cells(row,28).Value  MyRec("Col30") = objWorksheet.Cells(row,30).Value  end if 
+next 
+'msg = "I found " & Row & " rows in the spreadsheet and "  'msg = msg & ctrArrayElems & " GroupIDs" 
+'MsgBox(Msg) 
+objExcel.Application.quit  
+Set objWorksheet = nothing 
+Set objWorkbook = nothing 
+Set objExcel = nothing 
+'*------------* 
+'* Count the records in the recordset 
+'*------------* 
+'MyRec.movefirst 
+'i = 0 
+'while not MyRec.eof 
+' i = i + 1 
+' MyRec.Movenext 
+'wend  
+'MsgBox ("Before deduping, I saw " & i & " records") 
+'*------------* 
+'* Now remove duplicates from the recordset 
+'*------------* 
+Dim Lastrec, ThisRec 
+LastRec = "" 
+myrec.sort = "Col19,Col18" 
+MyRec.movefirst 
+while not MyRec.eof 
+ ThisRec = trim(MyRec("Col19")) & trim(MyRec("Col18"))  If LastRec = ThisRec then  
+ myrec.delete 
+ else 
+ LastRec = ThisRec 
+ end if 
+ MyRec.Movenext 
+wend  
+'*------------* 
+'* Count the records in the recordset 
+'*------------* 
+MyRec.movefirst 
+Dim Numrows : numRows = 0 
+while not MyRec.eof 
+ numRows = numRows + 1 
+ MyRec.Movenext 
+wend  
+'MsgBox ("After deduping, I saw " & numRows & " records") 
+'*------------* 
+'* Now create a Word table with the fields
+'*------------* 
+Dim objWord, objDoc, objRange, objTable 
+Const NUMBER_OF_COLUMNS = 7 
+Set objWord = CreateObject("Word.Application") 
+objWord.Visible = True 
+Set objDoc = objWord.Documents.Add() ' Create a NEW document Set objRange = objDoc.Range() 
+objDoc.Tables.Add objRange, numRows, NUMBER_OF_COLUMNS 
+Set objTable = objDoc.Tables(1) ' Work with the first (and only) table objTable.Cell(1, 1).Range.Text = "STIG ID" 
+objTable.Cell(1, 2).Range.Text = "VULID" 
+objTable.Cell(1, 3).Range.Text = "ID10" 
+objTable.Cell(1, 4).Range.Text = "Severity" 
+objTable.Cell(1, 5).Range.Text = "Weight" 
+objTable.Cell(1, 6).Range.Text = "FixRef" 
+objTable.Cell(1, 7).Range.Text = "System" 
+objTable.Cell(2, 1).Range.Text = "Col S" 
+objTable.Cell(2, 2).Range.Text = "Col R" 
+objTable.Cell(2, 3).Range.Text = "Col U" 
+objTable.Cell(2, 4).Range.Text = "Col V" 
+objTable.Cell(2, 5).Range.Text = "Col W" 
+objTable.Cell(2, 6).Range.Text = "Col AB" 
+objTable.Cell(2, 7).Range.Text = "Col AD" 
+MyRec.movefirst 
+Row = 3 
+while not MyRec.eof 
+ objTable.Cell(row, 1).Range.Text = MyRec("Col19") 
+ objTable.Cell(row, 2).Range.Text = MyRec("Col18") 
+ objTable.Cell(row, 3).Range.Text = MyRec("Col21") 
+ objTable.Cell(row, 4).Range.Text = MyRec("Col22") 
+ objTable.Cell(row, 5).Range.Text = MyRec("Col23") 
+ objTable.Cell(row, 6).Range.Text = MyRec("Col28") 
+ objTable.Cell(row, 7).Range.Text = MyRec("Col30") 
+ MyRec.Movenext : row = row + 1 
+wend  
+objTable.AutoFormat(16) 
+MsgBox("Your Word table is ready!") 
+Wscript.quit
