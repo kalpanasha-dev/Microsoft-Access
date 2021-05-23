@@ -1,0 +1,37 @@
+Option Explicit 
+Dim objFSO, objIPFile, objOPFile 
+Dim FN, ipPath, opPath 
+Dim CtrIP, CtrOP, ipLine, OPLine, ctrSkipped 
+Dim Msg, i 
+If Wscript.Arguments.Count = 0 then  
+ wscript.echo "Please drag a file on top of the icon!" 
+ wscript.quit 
+end if 
+ipPath = wscript.arguments(0) ' Complete input file name OpPath = left(IpPath,len(IpPath)-5) & ".txt" 
+Set objFSO = CreateObject("Scripting.FileSystemObject") 
+Set objIpFile = objFSO.OpenTextFile(IPPath) 
+Set objOPFile = objFSO.CreateTextFile(OPPath) 
+CtrIP = 0 : CtrOP = 0 
+Do Until objIPFile.AtEndOfStream 
+ ipLine = RTrim(objIPFile.ReadLine) : CtrIP = CtrIP + 1 
+ If (left(IpLine,1) = "<") or _ 
+ (instr(1,IpLine,"<html>",vbTextCompare) > 0) or _ 
+ (instr(1,IpLine,"<tt>",vbTextCompare) > 0) or _ 
+ (instr(1,IpLine,"<td w",vbTextCompare) > 0) then 
+ ctrSkipped = ctrSkipped + 1 
+ else 
+ objOPFile.writeline(iPLine) : CtrOP = CtrOP + 1 
+ end if 
+loop 
+objIPfile.Close() 
+objOPfile.Close() 
+Msg = ""  
+Msg = Msg & "IpFile: " & IPPath & vbCRLF 
+Msg = Msg & "OpFile: " & OPPath & vbCRLF 
+Msg = Msg & CtrIP & " records read. " & vbCRLF 
+Msg = Msg & CtrSkipped & " records skipped." & vbCrLF 
+Msg = Msg & CtrOP & " records written." & vbCrLF 
+MsgBox Msg,,Wscript.Scriptname 
+Set objFSO = nothing 
+Set objIPFile = nothing 
+Set objOPFile = nothing
