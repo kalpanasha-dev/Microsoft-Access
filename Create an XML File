@@ -1,0 +1,37 @@
+' Create an XML File  
+Set xmlDoc = CreateObject("Microsoft.XMLDOM")  
+  
+Set objRoot = xmlDoc.createElement("Level1")  
+xmlDoc.appendChild objRoot  
+For i = 1 to 3 
+ Set objRecord = xmlDoc.createElement("Level2")  
+ objRoot.appendChild objRecord '<--- objRecord is Level 2   
+ Set objName = xmlDoc.createElement("DataElement1")  
+ objName.Text = "Data Element 1" 
+ objRecord.appendChild objName  
+ Set objDate = xmlDoc.createElement("DataElement2")  
+ objDate.Text = "Data Element 2"  
+ objRecord.appendChild objDate  
+Next  
+Set objIntro = xmlDoc.createProcessingInstruction _ 
+ ("xml","version='1.0'")  
+xmlDoc.insertBefore _ 
+ objIntro,xmlDoc.childNodes(0)  
+xmlDoc.Save "xmlexample.xml"  
+MsgBox "Complete!",,wscript.scriptname 
+This command creates this: 
+<?xml version="1.0"?> 
+<Level1> 
+ <Level2> 
+ <DataElement1>Data Element 1</DataElement1> 
+ <DataElement2>Data Element 2</DataElement2>  
+ </Level2> 
+ <Level2> 
+ <DataElement1>Data Element 1</DataElement1> 
+ <DataElement2>Data Element 2</DataElement2> 
+ </Level2> 
+ <Level2> 
+ <DataElement1>Data Element 1</DataElement1> 
+ <DataElement2>Data Element 2</DataElement2> 
+ </Level2> 
+</Level1>
