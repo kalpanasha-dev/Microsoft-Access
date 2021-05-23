@@ -1,0 +1,56 @@
+Option Explicit 
+Class Driver 
+ Private m_DriverName 
+ Private m_DriverLNo 
+ Private m_CitationCount 
+ Private Sub Class_Initialize 
+ m_DriverName = "" 
+ m_DriverLNo = "" 
+ m_CitationCount = 0 
+ End Sub 
+ ' DriverName property. 
+ Public Property Get DriverName 
+ DriverName = m_DriverName 
+ End Property 
+ Public Property Let DriverName(p_drivername)  m_DriverName = p_drivername 
+ End Property 
+ ' DriverLicense Number property. 
+ Public Property Get DriverLNo 
+ DriverLNo = m_DriverLNo 
+ End Property 
+ Public Property Let DriverLNo(p_driverLNo)  m_DriverLNo = p_driverLNo 
+ End Property 
+ ' CitationCount property (read only). 
+ Public Property Get CitationCount 
+ CitationCount = m_CitationCount 
+ End Property 
+ ' Methods. 
+ Public Sub IncreaseCitations(p_valuetoincrease)  m_CitationCount = m_CitationCount + p_valuetoincrease  End Sub 
+ Public Sub ClearCitationCount 
+ m_CitationCount = 0 
+ End Sub 
+End Class 
+'*-------------* 
+'* Declare our variables and constants 
+'*-------------* 
+Const strFilename = "WriteRec.XML" 
+Dim c, Msg, intRecNum 
+Set c = New Driver 
+intRecNum = 0 
+c.DriverName = "Arnie Schwartz" 
+c.DriverLNo = "CA123456" 
+c.IncreaseCitations(5) 
+c.IncreaseCitations(3)
+DispOneRec 
+  
+c.DriverName = "Maria Schriver" 
+c.DriverLNo = "CA123457" 
+c.IncreaseCitations(2) 
+DispOneRec 
+MsgBox "Complete! I wrote " & intRecNum & " records.",,WScript.scriptname 
+Sub DispOneRec 
+ intRecNum = intRecNum + 1 
+ Msg = "Driver name=" & c.Drivername & ";" & vbcrlf 
+ Msg = Msg & "Driver License No.=" & c.DriverLNo & ";" & vbcrlf  Msg = Msg & "No. of citations=" & c.CitationCount & vbcrlf  MsgBox Msg,,WScript.Scriptname 
+ c.ClearCitationCount 
+End sub
