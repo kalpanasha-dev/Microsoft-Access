@@ -1,0 +1,42 @@
+Option Explicit 
+Const Provider = "microsoft.jet.oledb.4.0" 
+const adInteger = 3 ' Integer 
+const adVarChar = 202 ' Variable Character Dim db, ds, catalog, tblData, conn, cmd, RS, Msg, sql 
+db = "\\Dmvfsp08\mwdxg12$\Data\Scripts\TestDB.mdb" '<--- path and file name ds = "provider=" & provider & "; data source=" & db ' Connection string 
+set catalog = createobject("adox.catalog") 
+catalog.create ds 
+' Create a table in this database 
+set tblData = createobject("adox.table") 
+tblData.Name = "tblInfo" 
+tblData.columns.append "id", adInteger 
+tblData.columns.append "surname", adVarChar, 30 
+tblData.columns.append "Address", adVarChar, 30 
+tblData.keys.append "Info_Key", 1, "id" 'unique id 
+catalog.Tables.Append tblData  
+' Now populate the database table 
+set conn = createobject("adodb.connection") 
+conn.open ds 
+sql = "insert into tblInfo (id, Surname, Address) values (1,'Grund','1234 W 5th Street')" conn.Execute sql 
+sql = "insert into tblInfo (id, Surname, Address) values (2,'Smith','4523 N 6th Street')" conn.Execute sql 
+sql = "insert into tblInfo (id, Surname, Address) values (3,'Jones','7890 S 1st Street')" conn.Execute sql 
+sql = "insert into tblInfo (id, Surname, Address) values (4,'Blake','6543 E 2nd Street')" conn.Execute sql 
+conn.close 
+' Now read back the data, and display it. 
+set cmd = createobject("adodb.command") 
+conn.open ds 
+cmd.ActiveConnection = conn 
+sql = "Select id, SurName, Address from tblInfo" 
+cmd.CommandText = sql 
+set RS = cmd.execute 
+' Enumerate each row in the result set
+Msg = "" 
+while rs.EOF <> true and rs.BOF <> True 
+ Msg = Msg & "ID=" & rs(0) & "; Surname=" & rs(1) & "; Address=" & rs(2) & vbcrlf  rs.movenext 
+wend 
+conn.close 
+MsgBox Msg,,"Table contents" 
+' Free the memory 
+set tblData = nothing 
+set catalog = nothing 
+set conn = nothing 
+MsgBox "Database created, populated, and read!",,wscript.scriptname
