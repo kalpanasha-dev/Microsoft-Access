@@ -1,0 +1,41 @@
+Option Explicit 
+Dim objApp, objFSO, col, row 
+Dim IpFn, OpFn, ctrOP, OurPath, objOpFile, opLine, strwk 
+Dim oServiceManager, objDesktop, oDoc, oSheet, oCell, nValue 
+Dim mArgs(0) ' Declare an array 
+OurPath = "C:\Grund\Misc\"  
+IpFn = OurPath & "Symphony_Spreadsheet_Example.ods" 
+OpFn = OurPath & "Process ODS File output.txt" 
+' Start the Service Manager or connect to existing one  
+Set oServiceManager = WScript.CreateObject("com.sun.star.ServiceManager") 
+' Create the Desktop - the default frame  
+Set objDesktop = oServiceManager.createInstance("com.sun.star.frame.Desktop") ' Open a Existing ODT  
+' TODO: Open the spreadsheet WITHOUT displaying the Symphony opening screen! ' The "MakePropertyValue" below does NOT hide the application (Lotus Symphony) ' screen. 
+'Set mArgs(0) = MakePropertyValue("Hidden", False) 
+Set mArgs(0) = nothing 
+Set oDoc = objDesktop.loadComponentFromURL("file:///" & IpFn, "_blank", 0, mArgs) 
+strWk = "" : row = 6 
+For col = 1 to 12  
+ set oSheet = oDoc.getSheets().getByName("A")  
+ set oCell = oSheet.getCellByPosition(col-1, row-1)  
+ ' nValue = oCell.getValue() ' Get the numeric value 
+ nValue = oCell.getstring() ' get the string value 
+ strwk = strwk & nValue & "/"  
+Next 
+msgbox "The values in row " & row & " are " & strwk  
+' Open the output text file 
+'Set objFSO = CreateObject("Scripting.FileSystemObject") 
+'Set objOpFile = objFSO.CreateTextFile(OpFn) 
+'ctrOP = 0  
+' Cleanup 
+oDoc.Close (True) 
+Set oDoc = Nothing 
+'objOpFile.close 
+wscript.quit 
+' This is a standard function that is required in many cases. 
+Function MakePropertyValue(cName, uValue) 
+ Dim oStruct 
+ Set oStruct = oServiceManager.Bridge_GetStruct("com.sun.star.beans.PropertyValue")  oStruct.Name = cName 
+ oStruct.Value = uValue 
+ Set MakePropertyValue = oStruct
+End Function
