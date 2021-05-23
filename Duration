@@ -1,0 +1,13 @@
+' Duration - Calculate how long something has taken 
+Option Explicit 
+Dim tmStart, tmEnd, tmDur 
+tmStart = trim(InputBox("What is the start time?","Start Time",FormatDateTime(now(),4))) tmEnd = trim(InputBox("What is the end time?","End Time")) 
+If (TmStart = null) or (TmStart = "") or (TmEnd = null) or (TmEnd = "") then  MsgBox "Please enter a valid non-blank time",,"Error!" 
+ wscript.quit 
+end if 
+tmDur = DateDiff("n",tmStart,tmEnd) 
+If tmDur < 0 then  
+ MsgBox "The start time should be earlier than the end time." & vbcrlf & "Please try  again.",,"Error!" 
+ wscript.quit 
+end if 
+MsgBox "That task took " & tmDur & " minutes.",,wscript.scriptname
